@@ -1,5 +1,11 @@
+import ExamPage from "./Pages/ExamPage/ExamPage";
+
 function App() {
-  return <div className="text-center">CODE EDITOR</div>;
+  return (
+  <div>
+    <ExamPage/>
+  </div>
+);
 }
 
 export default App;
