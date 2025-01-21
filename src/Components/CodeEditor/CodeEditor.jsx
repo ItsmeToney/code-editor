@@ -4,7 +4,7 @@ import { useState } from "react";
 
 function CodeEditor(props) {
   //const [value, setValue] = useState("");
-  const [language, setLanguage] = useState("python");
+  const [language, setLanguage] = useState("javascript");
 
   const {
     value,
@@ -28,12 +28,14 @@ function CodeEditor(props) {
         >
           <option value="python">Python</option>
           <option value="java">Java</option>
-          <option value="c">C</option>
+          <option value="cpp">C++</option>
           <option value="javascript">JavaScript</option>
         </select>
       </div>
       <div>
-        <Editor
+        {
+          
+          <Editor
           line={5}
           theme="vs-dark"
           width="96vw"
@@ -44,11 +46,13 @@ function CodeEditor(props) {
             setValue(value);
           }}
         />
+        
+        }
       </div>
       <div className="bg-[#1E1E1E] p-2 flex justify-end border-t border-[#333333]">
         <button
           className="bg-green-600 px-4 w-36 py-1 text-white  rounded-lg"
-          onClick={onRun}
+          onClick={()=>onRun(language)}
         >
           Run
         </button>
