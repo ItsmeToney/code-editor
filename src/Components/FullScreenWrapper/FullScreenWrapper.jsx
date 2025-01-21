@@ -24,6 +24,8 @@ const FullScreenWrapper = ({ children }) => {
     const blockedKeys = [
       "Escape", "F11", "Alt", "Tab", "Ctrl", "Shift", "Backspace", "F5", "F12"
     ];
+    console.log(event.key);
+    
     if (blockedKeys.includes(event.key)) {
       event.preventDefault();
     }
@@ -75,7 +77,7 @@ const FullScreenWrapper = ({ children }) => {
   }, []);
 
   return (
-    <div style={{ width: "100vw", height: "100vh", margin: 0 }}>
+    <div id="full_screen">
       {children}
     </div>
   );

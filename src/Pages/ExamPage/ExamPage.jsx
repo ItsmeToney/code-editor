@@ -1,28 +1,69 @@
 import { useState } from "react";
-import CodeEditor from "../../Components/CodeEditor/CodeEditor";
 import Timer from "../../Components/Timer/Timer";
+import CodeEditor from "../../Components/CodeEditor/CodeEditor";
+import axios from "axios";
+import FullScreenWrapper from '../../Components/FullScreenWrapper/FullScreenWrapper'
 
 function ExamPage() {
   const [code, setCode] = useState();
-const handleRun = ()=>{
-    console.log(code)
-}
+  const [result, setResult] = useState([
+    { input: "15\n12", expectedOutput: "27", output: "", success: false },
+    { input: "5\n7", expectedOutput: "12", output: "", success: false },
+    { input: "0\n0", expectedOutput: "0", output: "", success: false },
+  ]);
 
-const handleTimeOut = ()=>{
-    console.log('time our')
-    
-}
+  const testCases = [
+    {
+      "input": "15\n12",
+      "expectedOutput": "27"
+    },
+    {
+      "input": "5\n7",
+      "expectedOutput": "12"
+    },
+    {
+      "input": "0\n0",
+      "expectedOutput": "0"
+    }
+  ];
+
+  const handleRun = async (language) => {
+    try {
+      const response = await axios.post("http://localhost:5000/execute", {
+        language: language,
+        code: code,
+        testCases: testCases,
+      });
+      const { results } = response.data;
+      console.log(results);
+      
+      const updatedResults = results.map((res) => ({
+        input: res.input,
+        expectedOutput: res.expectedOutput,
+        output: res.output,
+        success: res.success,
+      }));
+
+      setResult(updatedResults);
+    } catch (error) {
+      console.error("Error executing code:", error);
+    }
+  };
+
+  const handleTimeOut = () => {
+    console.log("time our");
+  };
 
   return (
-    // <FullScreenWrapper>
+     <FullScreenWrapper>
     <div className="bg-slate-100 w-full h-full px-5">
       <div className="py-3 flex justify-between items-center sticky top-0 bg-slate-100">
         <div>
           <h1 className="text-lg font-semibold">CST333</h1>
-          <h1 className="text-3xl font-bold">OOPS in Java lab examination</h1>
+          <h1 className="text-3xl font-bold">Python lab examination</h1>
         </div>
         <div>
-          <Timer hour={.5} onTimeUp={handleTimeOut}/>
+          <Timer hour={0.5} onTimeUp={handleTimeOut} />
           <div className="px-4 py-2 bg-red-500 text-white rounded-md flex justify-center">
             Submit
           </div>
@@ -35,26 +76,48 @@ const handleTimeOut = ()=>{
         </div>
         <div>
           <h1 className="m-1 text-lg">
-            Write a C program to print sum of 2 numbers
+            Write a Python program to print sum of 2 numbers
           </h1>
-          <h1>Test cases</h1>
-          <ul className="list-disc pl-10">
-            <li>tc1</li>
-            <li>tc1</li>
-            <li>tc1</li>
-            <li>tc1</li>
-          </ul>
+          <table className="table-auto w-full text-left">
+            <thead className="text-xs uppercase">
+              <tr>
+                <th className="px-6 py-3">Test Case</th>
+                <th className="px-6 py-3">Expected Output</th>
+                <th className="px-6 py-3">Actual Output</th>
+                <th className="px-6 py-3">Pass/Fail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.map((testCase, index) => (
+                <tr key={index} className="border-b">
+                  <td className="px-6 py-3">{testCase.input}</td>
+                  <td className="px-6 py-3">{testCase.expectedOutput}</td>
+                  <td className="px-6 py-3">{testCase.output || "N/A"}</td>
+                  <td className="px-6 py-3">
+                    {testCase.success ? (
+                      <span className="text-green-500">Pass</span>
+                    ) : (
+                      <span className="text-red-500">Fail</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
       <div className="mt-3 flex justify-between">
         <div>
-          <CodeEditor value={code} setValue={setCode} onRun={handleRun}/>
+          {
+            <CodeEditor value={code} setValue={setCode} onRun={handleRun} />
+            //<CodeEditorMirror val={code} setValue={setCode} onRun={handleRun} />
+          }
         </div>
       </div>
-      <div className="h-14">
-      </div>
+      
+      <div className="h-14"></div>
     </div>
-    //</FullScreenWrapper>
+    </FullScreenWrapper>
   );
 }
 
