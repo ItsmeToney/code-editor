@@ -4,13 +4,9 @@ import { useState } from "react";
 
 function CodeEditor(props) {
   //const [value, setValue] = useState("");
-  const [language, setLanguage] = useState("javascript");
+  const [language, setLanguage] = useState("Javascript");
 
-  const {
-    value,
-    setValue,
-    onRun,
-  } = props;
+  const { value, setValue, onRun } = props;
 
   return (
     <div className="rounded-lg overflow-clip ">
@@ -26,33 +22,31 @@ function CodeEditor(props) {
             console.log(evnt.target.value);
           }}
         >
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-          <option value="javascript">JavaScript</option>
+          <option value="Python">Python</option>
+          <option value="Java">Java</option>
+          <option value="C">C</option>
+          <option value="Javascript">JavaScript</option>
         </select>
       </div>
       <div>
         {
-          
           <Editor
-          line={5}
-          theme="vs-dark"
-          width="96vw"
-          height="50vh"
-          defaultLanguage={language}
-          defaultValue={value}
-          onChange={(value) => {
-            setValue(value);
-          }}
-        />
-        
+            line={5}
+            theme="vs-dark"
+            width="96vw"
+            height="50vh"
+            language={language}
+            value={value}
+            onChange={(value) => {
+              setValue(value);
+            }}
+          />
         }
       </div>
       <div className="bg-[#1E1E1E] p-2 flex justify-end border-t border-[#333333]">
         <button
           className="bg-green-600 px-4 w-36 py-1 text-white  rounded-lg"
-          onClick={()=>onRun(language)}
+          onClick={() => onRun(language)}
         >
           Run
         </button>
