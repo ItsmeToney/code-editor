@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 import { Editor } from "@monaco-editor/react";
-import { useState } from "react";
+// import { useState } from "react";
 
 function CodeEditor(props) {
   //const [value, setValue] = useState("");
-  const [language, setLanguage] = useState("Javascript");
+  // const [language, setLanguage] = useState("C");
 
-  const { value, setValue, onRun } = props;
+  const { value, setValue, onRun, language, setLanguage } = props;
 
   return (
     <div className="rounded-lg overflow-clip ">
@@ -25,7 +25,6 @@ function CodeEditor(props) {
           <option value="Python">Python</option>
           <option value="Java">Java</option>
           <option value="C">C</option>
-          <option value="Javascript">JavaScript</option>
         </select>
       </div>
       <div>
