@@ -6,26 +6,37 @@ const FullScreenWrapper = ({ children }) => {
     const elem = document.documentElement;
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch((err) => {
-        console.error("Error attempting to enable full-screen mode:", err.message);
+        console.error(
+          "Error attempting to enable full-screen mode:",
+          err.message
+        );
       });
     }
   };
 
-//   const exitFullScreen = () => {
-//     if (document.exitFullscreen) {
-//       document.exitFullscreen().catch((err) => {
-//         console.error("Error attempting to exit full-screen mode:", err.message);
-//       });
-//     }
-//   };
+  //   const exitFullScreen = () => {
+  //     if (document.exitFullscreen) {
+  //       document.exitFullscreen().catch((err) => {
+  //         console.error("Error attempting to exit full-screen mode:", err.message);
+  //       });
+  //     }
+  //   };
 
   // Block specific keys (Escape, F11, Ctrl, Alt, etc.)
   const preventKeys = (event) => {
     const blockedKeys = [
-      "Escape", "F11", "Alt", "Tab", "Ctrl", "Shift", "Backspace", "F5", "F12"
+      "Escape",
+      "F11",
+      "Alt",
+      "Tab",
+      "Ctrl",
+      "Shift",
+      "Backspace",
+      "F5",
+      "F12",
     ];
-    console.log(event.key);
-    
+    // console.log(event.key);
+
     if (blockedKeys.includes(event.key)) {
       event.preventDefault();
     }
@@ -51,7 +62,7 @@ const FullScreenWrapper = ({ children }) => {
     const preventWindowClose = (event) => {
       if (event) {
         event.preventDefault();
-        event.returnValue = ''; // This triggers a browser prompt
+        event.returnValue = ""; // This triggers a browser prompt
       }
     };
     window.addEventListener("beforeunload", preventWindowClose);
@@ -76,11 +87,7 @@ const FullScreenWrapper = ({ children }) => {
     };
   }, []);
 
-  return (
-    <div id="full_screen">
-      {children}
-    </div>
-  );
+  return <div id="full_screen">{children}</div>;
 };
 
 export default FullScreenWrapper;
