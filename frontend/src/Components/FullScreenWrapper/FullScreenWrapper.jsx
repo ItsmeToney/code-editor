@@ -1,7 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Warning from "../Warning/Warning";
 
 // eslint-disable-next-line react/prop-types
 const FullScreenWrapper = ({ children }) => {
+  const [isWarning, setWarning] = useState(false);
+
   const enterFullScreen = () => {
     const elem = document.documentElement;
     if (elem.requestFullscreen) {
@@ -14,15 +17,40 @@ const FullScreenWrapper = ({ children }) => {
     }
   };
 
-  //   const exitFullScreen = () => {
-  //     if (document.exitFullscreen) {
-  //       document.exitFullscreen().catch((err) => {
-  //         console.error("Error attempting to exit full-screen mode:", err.message);
-  //       });
-  //     }
-  //   };
+  // Blur fucntion perform
+  let timeoutId = null;
 
-  // Block specific keys (Escape, F11, Ctrl, Alt, etc.)
+  const handleViolation = () => {
+    timeoutId = setTimeout(() => {
+      setWarning(true); // Show warning after 3 seconds
+    }, 3000);
+  };
+
+  const handleReturn = () => {
+    clearTimeout(timeoutId); // Clear timer if user returns
+    setWarning(false);
+  };
+
+  useEffect(() => {
+    const handleBlur = () => handleViolation();
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleViolation();
+      } else {
+        handleReturn();
+      }
+    };
+
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  ////////////////////
   const preventKeys = (event) => {
     const blockedKeys = [
       "Escape",
@@ -66,9 +94,6 @@ const FullScreenWrapper = ({ children }) => {
       }
     };
     window.addEventListener("beforeunload", preventWindowClose);
-
-    // **Continuously check if fullscreen is still active (optional):**
-    // This can be helpful if the user accidentally exits fullscreen
     const checkFullscreen = setInterval(() => {
       if (!document.fullscreenElement) {
         enterFullScreen(); // Force fullscreen mode if exited
@@ -87,7 +112,12 @@ const FullScreenWrapper = ({ children }) => {
     };
   }, []);
 
-  return <div id="full_screen">{children}</div>;
+  return (
+    <>
+     {isWarning && <Warning onClose={()=>setWarning(false)}/>}
+      <div id="full_screen">{children}</div>
+    </>
+  );
 };
 
 export default FullScreenWrapper;
