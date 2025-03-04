@@ -165,10 +165,12 @@ function ExamPage() {
   useEffect(() => {
     async function fetchQuestion() {
       try {
-        const response = await axios.get("http://localhost:5000/questions");
+        const response = await axios.get(
+          "https://code-editor-backend-production-e36d.up.railway.app/questions"
+        );
         const questions = response.data.data;
-        const index = Math.floor(Math.random() * questions.length);
-        const selectedQuestion = questions[index];
+        // const index = Math.floor(Math.random() * questions.length);
+        const selectedQuestion = questions[2];
         console.log(selectedQuestion);
 
         setQuestion({
@@ -186,6 +188,7 @@ function ExamPage() {
             success: null,
           }))
         );
+        console.log(result);
       } catch (err) {
         console.log("Error fetching question:", err);
       }
@@ -198,7 +201,7 @@ function ExamPage() {
     async function fetchFunctionSignature() {
       try {
         const signatureResponse = await axios.get(
-          `http://localhost:5000/questions/${question.id}/${language}`
+          `https://code-editor-backend-production-e36d.up.railway.app/questions/${question.id}/${language}`
         );
         setCode(signatureResponse.data.functionSignature);
       } catch (err) {
@@ -213,12 +216,14 @@ function ExamPage() {
     if (!question) return;
 
     try {
-      const response = await axios.post("http://localhost:5000/execute", {
+      const data = {
         questionId: question.id,
         language,
         functionCode: code,
         testCases: question.testCases, // Only send function body
-      });
+      };
+      console.log(data);
+      const response = await axios.post("http://localhost:7000/execute", data);
 
       const { results } = response.data;
       setResult(
@@ -277,7 +282,9 @@ function ExamPage() {
                         ? testCase.input.join(", ")
                         : testCase.input}
                     </td>
-                    <td className="px-6 py-3">{testCase.expectedOutput}</td>
+                    <td className="px-6 py-3">
+                      {testCase.expectedOutput.toString()}
+                    </td>
                     <td className="px-6 py-3">{testCase.output || "N/A"}</td>
                     <td className="px-6 py-3">
                       {testCase.success === null ? (
