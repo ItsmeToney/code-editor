@@ -133,13 +133,28 @@ const codeExecution = async (req, res) => {
 
     const { fileName, compileCommand, runCommand } =
       getLanguageConfig(language);
-
+    console.log(fileName, compileCommand, runCommand);
     // Write the full code to a temporary file
+
     fs.writeFileSync(fileName, fullCode);
+
+    //Checking if the file is created or not
+    if (!fs.existsSync(fileName)) {
+      console.error(`Error: ${fileName} was not created.`);
+      return res.status(500).json({ error: `${fileName} was not created.` });
+    } else {
+      console.log(`${fileName} exists.`);
+    }
+
+    //checking if the compiler exists
+    execPromise("gcc --version").catch(console.error); // For C
+    execPromise("javac -version").catch(console.error); // For Java
+    execPromise("python --version").catch(console.error); // For Python
 
     // Compile if necessary
     if (compileCommand) {
       await execPromise(compileCommand);
+      console.log("Compiled successfully");
     }
 
     // Execute test cases
@@ -178,20 +193,29 @@ ${testCases
     return 0;
 }`;
   } else if (language === "Java") {
-    wrappedCode = `public class Main {
-${functionCode}
-
-public static void main(String[] args) {
-${testCases
-  .map(
-    (test) =>
-      `    System.out.println(solution(${
-        Array.isArray(test.input)
-          ? test.input.map((arg) => JSON.stringify(arg)).join(", ")
-          : JSON.stringify(test.input)
-      }));`
-  )
-  .join(" ")}
+    wrappedCode = `${functionCode}
+    public class Main {
+    public static void main(String[] args) {
+    ${testCases
+      .map(
+        (test) =>
+          `  System.out.println(new Solution().solution(${
+            typeof test.input === "string"
+              ? `"${test.input}"` // Single string case -> solution("string")
+              : Array.isArray(test.input)
+              ? test.input.length === 1 && typeof test.input[0] === "string"
+                ? `"${test.input[0]}"` // ["string"] should become solution("string")
+                : Array.isArray(test.input[0])
+                ? typeof test.input[0][0] === "string"
+                  ? `new String[]{${test.input[0]
+                      .map((str) => `"${str}"`)
+                      .join(", ")}}`
+                  : `new int[]{${test.input[0].join(", ")}}`
+                : test.input.join(", ")
+              : test.input
+          }));`
+      )
+      .join(" ")}
 }}`;
   } else if (language === "Python") {
     wrappedCode = `${functionCode}
@@ -249,7 +273,8 @@ const runTestCases = async (runCommand, testCases) => {
     // const resOutput = await execPromiseWithInput(runCommand, input);
 
     // Compare actual output with expected output
-    const isPassed = outputArray[i].replace("\r", "") === output.trim();
+    const isPassed =
+      outputArray[i].replace("\r", "") === output.toString().trim();
 
     testResults.push({
       testCase: i + 1,
@@ -266,9 +291,16 @@ const runTestCases = async (runCommand, testCases) => {
 // **4. Helper function to execute commands**
 const execPromise = (command) => {
   return new Promise((resolve, reject) => {
+    console.log(`Executing command: ${command}`);
     exec(command, (error, stdout, stderr) => {
-      if (error) reject(stderr || error.message);
-      else resolve(stdout);
+      if (error) {
+        console.error(`Execution error: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        reject(stderr || error.message);
+      } else {
+        console.log(`stdout: ${stdout}`);
+        resolve(stdout);
+      }
     });
   });
 };
@@ -301,7 +333,14 @@ const cleanupTempFiles = (language) => {
     if (language === "C") {
       fs.unlinkSync("Main.exe"); // Remove compiled C binary
     }
-    if (language === "Java") fs.unlinkSync("Main.class"); // Remove compiled Java class
+    if (language === "Java") {
+      if (fs.existsSync("Solution.class")) {
+        fs.unlinkSync("Solution.class");
+      }
+      if (fs.existsSync("Main.class")) {
+        fs.unlinkSync("Main.class");
+      }
+    } // Remove compiled Java class
   } catch (err) {
     console.error("Cleanup Error:", err.message);
   }
